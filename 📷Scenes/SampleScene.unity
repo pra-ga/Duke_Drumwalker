@@ -2191,6 +2191,10 @@ PrefabInstance:
       propertyPath: m_Camera
       value: 
       objectReference: {fileID: 330585545}
+    - target: {fileID: 3753562851088458693, guid: 5aeba6e56c8031a44978309faa4c4467, type: 3}
+      propertyPath: m_Actions
+      value: 
+      objectReference: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
     - target: {fileID: 3865988349688792664, guid: 5aeba6e56c8031a44978309faa4c4467, type: 3}
       propertyPath: m_Name
       value: "\u2B50Duke"

@@ -5,9 +5,10 @@ using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 #region Todo
-// BUG : Prevent jump if there is no floor across jelly. Check by ray casting 3 tiles away.
-// BUG : Jelly should get summoned only on a tile
+// BUG : ✅Prevent jump if there is no floor across jelly. Check by ray casting 3 tiles away.
+// BUG : ✅Jelly should get summoned only on a tile
 // BUG : ✅Remove dependecy on JumpForce. Instead check the cooridinate of the next tile.
+// BUG : When the player refuses to jump on jelly, he does not turn
 // TODO: Summon particle effects
 // TODO: Fix raycast
 // TODO: States enum
@@ -53,11 +54,11 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("RayCast Checker")]
     [SerializeField] Transform raycastOrigin;
+    [SerializeField] Transform jellyRaycastOrigin;
     [SerializeField] float raycastDistanceToCheckWalk = 1f; // Set the raycast distance to check next tile
     [SerializeField] float raycastDistanceToCheckJump = 3f; // Set the raycast distance to check next tile
-    [SerializeField] string targetTagForWalk = "none"; // The tag to look for before walking
-    [SerializeField] string targetTagForJump = "none"; // The tag to look for before jumping
     Vector3 playerToJellyDirection = Vector3.zero;
+    JumpChecker jumpChecker;
 
 
     void Start()
@@ -88,105 +89,140 @@ public class PlayerMovement : MonoBehaviour
 
     public void OnMove(InputAction.CallbackContext context)
     {
+        if (IsJellyAhead())
         {
-            targetTagForWalk = RayCastToCheckWalk();
+            Debug.Log("IsJellyAhead");
+            if (jumpChecker.CanPlayerJump())
             {
-                if (context.performed /* && (transform.position - targetPos).sqrMagnitude < 0.01f */ && State == States.Idle)
+                Debug.Log("CanPlayerJump");
                 {
-                    //State = States.Walk;
-                    Vector2 inputDirection = context.ReadValue<Vector2>();
-                    if (inputDirection.x > 0) // Move right
+                    if (canWalk())
                     {
-                        if (motionDirection != Vector3.right) //rotation
-                        {
-                            motionDirection = Vector3.right;
-                            Quaternion targetRotation = Quaternion.LookRotation(motionDirection, Vector3.up);
-                            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-                        }
-                        else
-                        {
-                            MoveOnlyIfThereIsATile();
-                        }
+                        MovePlayer(context);
                     }
-                    else if (inputDirection.x < 0) // Move left
-                    {
-                        if (motionDirection != Vector3.left)
-                        {
-                            motionDirection = Vector3.left;
-                            Quaternion targetRotation = Quaternion.LookRotation(motionDirection, Vector3.up);
-                            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-                        }
-                        else
-                        {
-                            MoveOnlyIfThereIsATile();
-                        }
-                    }
-                    else if (inputDirection.y > 0)
-                    {
-                        if (motionDirection != Vector3.forward)
-                        {
-                            motionDirection = Vector3.forward;
-                            Quaternion targetRotation = Quaternion.LookRotation(motionDirection, Vector3.up);
-                            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-                        }
-                        else
-                        {
-                            MoveOnlyIfThereIsATile();
-                        }
-                    }
-                    else if (inputDirection.y < 0)
-                    {
-                        if (motionDirection != Vector3.back)
-                        {
-                            motionDirection = Vector3.back;
-                            Quaternion targetRotation = Quaternion.LookRotation(motionDirection, Vector3.up);
-                            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-                        }
-                        else
-                        {
-                            MoveOnlyIfThereIsATile();
-                        }
-                    }
+                    State = States.Idle;
                 }
-                //Set to idle if no input or too far from the target position
-                else State = States.Idle;
             }
-
-            State = States.Idle;
+            else
+            {
+                Debug.Log("CannotJump");
+                EmoteNoAnimation();
+            }
         }
+        else
+        {
+            Debug.Log("NotJellyAhead");
+            /* if (canWalk())
+            {
+                Debug.Log("canWalk"); */
+            MovePlayer(context);
+            /* } else {
+                Debug.Log("CannotWalk");
+                EmoteNoAnimation();
+            } */
+        }
+    }
+
+    private void MovePlayer(InputAction.CallbackContext context)
+    {
+
+        if (context.performed /* && (transform.position - targetPos).sqrMagnitude < 0.01f */ && State == States.Idle)
+        {
+
+            //State = States.Walk;
+            Vector2 inputDirection = context.ReadValue<Vector2>();
+            if (inputDirection.x > 0) // Move right
+            {
+                if (motionDirection != Vector3.right) //rotation
+                {
+                    motionDirection = Vector3.right;
+                    Quaternion targetRotation = Quaternion.LookRotation(motionDirection, Vector3.up);
+                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+                }
+                else
+                {
+                    MoveOnlyIfThereIsATile();
+                }
+            }
+            else if (inputDirection.x < 0) // Move left
+            {
+                if (motionDirection != Vector3.left)
+                {
+                    motionDirection = Vector3.left;
+                    Quaternion targetRotation = Quaternion.LookRotation(motionDirection, Vector3.up);
+                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+                }
+                else
+                {
+                    MoveOnlyIfThereIsATile();
+                }
+            }
+            else if (inputDirection.y > 0)
+            {
+                if (motionDirection != Vector3.forward)
+                {
+                    motionDirection = Vector3.forward;
+                    Quaternion targetRotation = Quaternion.LookRotation(motionDirection, Vector3.up);
+                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+                }
+                else
+                {
+                    MoveOnlyIfThereIsATile();
+                }
+            }
+            else if (inputDirection.y < 0)
+            {
+                if (motionDirection != Vector3.back)
+                {
+                    motionDirection = Vector3.back;
+                    Quaternion targetRotation = Quaternion.LookRotation(motionDirection, Vector3.up);
+                    transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+                }
+                else
+                {
+                    MoveOnlyIfThereIsATile();
+                }
+            }
+        }
+        //Set to idle if no input or too far from the target position
+        else State = States.Idle;
     }
 
     private void MoveOnlyIfThereIsATile()
     {
-        if (targetTagForWalk == "Tile")
+        if (canWalk())
         {
             targetPos = transform.position + motionDirection * stepSize;
             animator.SetTrigger("walk");
         }
-        else if (targetTagForWalk == "none")
+        else
         {
-            animator.SetTrigger("No");
+            EmoteNoAnimation();
         }
+    }
+
+    private void EmoteNoAnimation()
+    {
+        animator.SetTrigger("No");
     }
 
     public void OnDrum(InputAction.CallbackContext context)
     {
         if (context.performed)
         {
-            targetTagForWalk = RayCastToCheckWalk();
-            if (targetTagForWalk == "Tile")
+            if (canWalk())
             {
                 if (!isDrumSummoned && State == States.Idle)
                 {
                     animator.SetTrigger("Summon");
                     _drum = Instantiate(drum, drumSummonPoint.position, drumSummonPoint.rotation);
                     jellyAnimator = _drum.GetComponentInChildren<Animator>();
+                    jumpChecker = _drum.GetComponentInChildren<JumpChecker>();
                     jellyAnimator.Play("Jelly-Place");
                     //originalDrumScale = _drum.transform.localScale;
                     //drumTopPos = _drum.transform.Find("DrumTopPos").transform;
-                    //Debug.Log("drumTopPos name: " + drumTopPos.name);
                     isDrumSummoned = true;
-                    playerToJellyDirection = _drum.transform.position -transform.position ;
+                    playerToJellyDirection = _drum.transform.position - transform.position;
                 }
                 else if (isDrumSummoned)
                 {
@@ -194,9 +230,9 @@ public class PlayerMovement : MonoBehaviour
                     isDrumSummoned = false;
                 }
             }
-            else if (targetTagForWalk == "none")
+            else
             {
-                animator.SetTrigger("No");
+                EmoteNoAnimation();
             }
         }
     }
@@ -218,8 +254,6 @@ public class PlayerMovement : MonoBehaviour
             transform.position = Vector3.MoveTowards(transform.position, targetPos, speed * Time.deltaTime);
         }
         DoorOpenCheck();
-        Debug.Log("RayCastToCheckJump(): " + RayCastToCheckJump());
-
     }
 
     void OnTriggerEnter(Collider other)
@@ -232,7 +266,7 @@ public class PlayerMovement : MonoBehaviour
             jellyAnimator.SetTrigger("wobble");
             //ScaleYSmoothly();
             drumPlus2Pos = other.transform.position + motionDirection.normalized * 2f;
-            StartCoroutine(WaitOnTheDrum());
+            StartCoroutine(JellyJump());
         }
 
         if (other.gameObject.tag == "Fruits")
@@ -250,7 +284,7 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    IEnumerator WaitOnTheDrum()
+    IEnumerator JellyJump()
     {
         yield return new WaitForSeconds(1f);
         rb.useGravity = true;
@@ -294,32 +328,27 @@ public class PlayerMovement : MonoBehaviour
         isScaling = false;
     }
 
-    void CheckForwardTile()
+    bool IsJellyAhead()
     {
-        Vector3 origin = raycastOrigin.position;
+        Vector3 origin = jellyRaycastOrigin.position;
         Vector3 direction = transform.forward;
         RaycastHit hit;
 
         if (Physics.Raycast(origin, direction, out hit, raycastDistanceToCheckWalk))
         {
-            Debug.Log("hit transform tag: " + hit.transform.tag);
-
-            if (hit.transform.CompareTag("Tile"))
+            Debug.DrawRay(origin, direction * raycastDistanceToCheckWalk, Color.hotPink);
+            if (hit.transform.CompareTag("Drum"))
             {
-                State = States.Walk;
+                return true;
             }
 
         }
-        else
-        {
-            animator.SetTrigger("No");
-        }
+        return false;
 
-        // Optional: Visualize the ray in the editor for debugging
-        Debug.DrawRay(origin, direction * raycastDistanceToCheckWalk, Color.red);
+
     }
 
-    string RayCastToCheckWalk()
+    bool canWalk()
     {
         Vector3 origin = raycastOrigin.position;
         Vector3 direction = transform.forward;
@@ -327,12 +356,12 @@ public class PlayerMovement : MonoBehaviour
 
         if (Physics.Raycast(origin, direction, out hit, raycastDistanceToCheckWalk))
         {
-            return hit.transform.tag;
+            if (hit.transform.tag == "Tile" || hit.transform.tag == "Fruits" || hit.transform.tag == "ExitDoor")
+            {
+                return true;
+            }
         }
-        else
-        {
-            return "none";
-        }
+        return false;
     }
 
     string RayCastToCheckJump()
@@ -342,7 +371,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (Physics.Raycast(origin, playerToJellyDirection, out hit, raycastDistanceToCheckJump))
         {
-            Debug.DrawLine(origin, origin + raycastDistanceToCheckJump * playerToJellyDirection, Color.blue );
+            Debug.DrawLine(origin, origin + raycastDistanceToCheckJump * playerToJellyDirection, Color.blue);
             return hit.transform.tag;
         }
         else
