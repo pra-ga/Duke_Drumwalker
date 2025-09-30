@@ -4,6 +4,16 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
+#region Todo
+// TODO: Summon particle effects
+// TODO: Fix raycast
+// TODO: States enum
+// TODO: Audio
+// TODO: Particle effects   
+// TODO: UI
+// TODO: Menu   
+#endregion
+
 public class PlayerMovement : MonoBehaviour
 {
     float stepSize = 1f; // The distance to move per key press
@@ -15,6 +25,8 @@ public class PlayerMovement : MonoBehaviour
     Vector3 targetPos;
     Vector3 drumPlus2Pos;
     Vector3 motionDirection;
+    enum States { Idle, Walk, Jump, Summon, DoorOpen };
+    States State;
 
     [Header("Drum")]
     [SerializeField] GameObject drum;
@@ -29,12 +41,18 @@ public class PlayerMovement : MonoBehaviour
     private bool isScaling = false;
     [SerializeField] GameObject door;
     Animator doorAnimator;
+    Animator jellyAnimator;
 
     [Header("Private")]
     int intNumberOfFruits = 0;
     int intNumberOfFruitsInScene = 0;
     int currentSceneInt;
+    ForwardChecker forwardChecker;
 
+    [Header("RayCast Checker")]
+    [SerializeField] Transform raycastOrigin;
+    public float raycastDistance = 1f; // Set the raycast distance to 1 unit
+    //public string targetTag = "MyTargetTag"; // The tag to look for
 
 
     void Start()
@@ -47,6 +65,8 @@ public class PlayerMovement : MonoBehaviour
         currentSceneInt = SceneManager.GetActiveScene().buildIndex;
         Debug.Log("currentSceneInt: " + currentSceneInt);
         LoadSceneVariables(currentSceneInt);
+        forwardChecker = GetComponentInChildren<ForwardChecker>();
+        State = States.Idle;
     }
 
     void LoadSceneVariables(int currentSceneInt)
@@ -135,7 +155,10 @@ public class PlayerMovement : MonoBehaviour
         {
             if (!isDrumSummoned)
             {
+                animator.SetTrigger("Summon");
                 _drum = Instantiate(drum, drumSummonPoint.position, drumSummonPoint.rotation);
+                jellyAnimator = _drum.GetComponentInChildren<Animator>();
+                jellyAnimator.Play("Jelly-Place");
                 //originalDrumScale = _drum.transform.localScale;
                 //drumTopPos = _drum.transform.Find("DrumTopPos").transform;
                 //Debug.Log("drumTopPos name: " + drumTopPos.name);
@@ -151,15 +174,22 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        transform.position = Vector3.MoveTowards(transform.position, targetPos, speed * Time.deltaTime);
+        if (State == States.Idle) CheckForwardTile();
+        if (State == States.Walk)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, targetPos, speed * Time.deltaTime);
+        }
         DoorOpenCheck();
+        
     }
 
     void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.tag == "Drum")
         {
-            transform.position = _drum.transform.position;
+            transform.position = new Vector3(_drum.transform.position.x, _drum.transform.position.y, _drum.transform.position.z); //_drum.transform.position;
+            jellyAnimator = _drum.GetComponentInChildren<Animator>();
+            jellyAnimator.SetTrigger("wobble");
             //ScaleYSmoothly();
             drumPlus2Pos = other.transform.position + motionDirection.normalized * 2f;
             StartCoroutine(WaitOnTheDrum());
@@ -182,11 +212,13 @@ public class PlayerMovement : MonoBehaviour
 
     IEnumerator WaitOnTheDrum()
     {
-        yield return new WaitForSeconds(1f); // Wait for 3 seconds
+        yield return new WaitForSeconds(1f);
         rb.useGravity = true;
         Vector3 Vec45 = transform.up.normalized + transform.forward.normalized;
         rb.AddForce(Vec45 * jumpForce, ForceMode.Impulse);
         targetPos = drumPlus2Pos;
+        yield return new WaitForSeconds(1.0f);
+        rb.useGravity = false;
     }
 
     void DoorOpenCheck()
@@ -221,5 +253,31 @@ public class PlayerMovement : MonoBehaviour
         objectToScale.localScale = toScale; // Ensure the target scale is reached precisely
         isScaling = false;
     }
-    
+
+    void CheckForwardTile()
+    {
+        Vector3 origin = raycastOrigin.position;
+        Vector3 direction = transform.forward;
+
+        RaycastHit hit;
+
+        if (Physics.Raycast(origin, direction, out hit, raycastDistance))
+        {
+            Debug.Log("hit transform tag: " + hit.transform.tag);
+
+            if (hit.transform.CompareTag("Tile"))
+            {
+                State = States.Walk;
+            }
+
+        }
+        else
+        {
+            animator.SetTrigger("No");
+        }
+
+        // Optional: Visualize the ray in the editor for debugging
+        Debug.DrawRay(origin, direction * raycastDistance, Color.red);
+    }
+
 }

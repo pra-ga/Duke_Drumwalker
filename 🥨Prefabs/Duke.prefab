@@ -98,6 +98,37 @@ SkinnedMeshRenderer:
     m_Center: {x: 0, y: 0.55938905, z: -0.042126328}
     m_Extent: {x: 0.22675087, y: 0.21613926, z: 0.24976516}
   m_DirtyAABB: 0
+--- !u!1 &430987306970245343
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 973916354474659379}
+  m_Layer: 0
+  m_Name: RayCastOrigin
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &973916354474659379
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 430987306970245343}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.073, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4410576635444328442}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1108681901784514396
 GameObject:
   m_ObjectHideFlags: 0
@@ -398,9 +429,9 @@ GameObject:
   m_Component:
   - component: {fileID: 4410576635444328442}
   - component: {fileID: 7474896952039139829}
-  - component: {fileID: 1797227193270981136}
   - component: {fileID: 5043228623444800801}
   - component: {fileID: 3753562851088458693}
+  - component: {fileID: 5763956571940548915}
   m_Layer: 0
   m_Name: Duke
   m_TagString: Player
@@ -423,6 +454,7 @@ Transform:
   m_Children:
   - {fileID: 6158016141583479422}
   - {fileID: 5591477897810445646}
+  - {fileID: 973916354474659379}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &7474896952039139829
@@ -452,29 +484,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 80
   m_CollisionDetection: 0
---- !u!136 &1797227193270981136
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3865988349688792664}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.17519355
-  m_Height: 0.7595353
-  m_Direction: 1
-  m_Center: {x: -0.0053834915, y: 0.38940907, z: 0}
 --- !u!114 &5043228623444800801
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -490,10 +499,15 @@ MonoBehaviour:
   speed: 2
   rotationSpeed: 1000
   jumpForce: 3
-  drum: {fileID: 999610633012721858, guid: 60777e9320bffd94dad8067908530712, type: 3}
+  drum: {fileID: 4090499745074693540, guid: 8c488929c1f30634eb6876bca2e93948, type: 3}
   drumSummonPoint: {fileID: 5591477897810445646}
   drumTopPos: {fileID: 0}
-  door: {fileID: 1300415543836533066, guid: 31dbb4903f006374d8d82fa438a1f009, type: 3}
+  targetScaleY: 0.5
+  duration: 1
+  door: {fileID: 0}
+  raycastOrigin: {fileID: 973916354474659379}
+  raycastDistance: 1
+  targetTag: MyTargetTag
 --- !u!114 &3753562851088458693
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -628,6 +642,27 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!65 &5763956571940548915
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3865988349688792664}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.32406425, y: 0.79445744, z: 0.42021036}
+  m_Center: {x: 0.002913475, y: 0.38538235, z: 0.010197401}
 --- !u!1 &6496609453330953345
 GameObject:
   m_ObjectHideFlags: 0
