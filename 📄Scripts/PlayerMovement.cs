@@ -89,44 +89,224 @@ public class PlayerMovement : MonoBehaviour
 
     public void OnMove(InputAction.CallbackContext context)
     {
-        if (IsJellyAhead())
+        if (context.performed && State == States.Idle)
+        {
+            if (IsJellyAhead())
+            {
+                Debug.Log("IsJellyAhead");
+                
+                {
+                    Debug.Log("CanPlayerJump");
+                    {
+                        //State = States.Walk;
+                        Vector2 inputDirection = context.ReadValue<Vector2>();
+                        if (inputDirection.x > 0) // Move right
+                        {
+                            if (motionDirection != Vector3.right) //rotation
+                            {
+                                motionDirection = Vector3.right;
+                                Quaternion targetRotation = Quaternion.LookRotation(motionDirection, Vector3.up);
+                                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+                            }
+                            else
+                            {
+                                if (canWalkForward() && jumpChecker.CanPlayerJump())
+                                {
+                                    targetPos = transform.position + motionDirection * stepSize;
+                                    animator.SetTrigger("walk");
+                                }
+                                else EmoteNoAnimation();
+                            }
+                        }
+                        else if (inputDirection.x < 0) // Move left
+                        {
+                            if (motionDirection != Vector3.left)
+                            {
+                                motionDirection = Vector3.left;
+                                Quaternion targetRotation = Quaternion.LookRotation(motionDirection, Vector3.up);
+                                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+                            }
+                            else
+                            {
+                                if (canWalkForward() && jumpChecker.CanPlayerJump())
+                                {
+                                    targetPos = transform.position + motionDirection * stepSize;
+                                    animator.SetTrigger("walk");
+                                }
+                                else EmoteNoAnimation();
+                            }
+                        }
+                        else if (inputDirection.y > 0)
+                        {
+                            if (motionDirection != Vector3.forward)
+                            {
+                                motionDirection = Vector3.forward;
+                                Quaternion targetRotation = Quaternion.LookRotation(motionDirection, Vector3.up);
+                                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+                            }
+                            else
+                            {
+                                if (canWalkForward() && jumpChecker.CanPlayerJump())
+                                {
+                                    targetPos = transform.position + motionDirection * stepSize;
+                                    animator.SetTrigger("walk");
+                                }
+                                else EmoteNoAnimation();
+                            }
+                        }
+                        else if (inputDirection.y < 0)
+                        {
+                            if (motionDirection != Vector3.back)
+                            {
+                                motionDirection = Vector3.back;
+                                Quaternion targetRotation = Quaternion.LookRotation(motionDirection, Vector3.up);
+                                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+                            }
+                            else
+                            {
+                                if (canWalkForward() && jumpChecker.CanPlayerJump())
+                                {
+                                    targetPos = transform.position + motionDirection * stepSize;
+                                    animator.SetTrigger("walk");
+                                }
+                                else EmoteNoAnimation();
+                            }
+                        }
+                    }
+                }
+                /* else
+                {
+                    EmoteNoAnimation();
+                    State = States.Idle;
+                }*/
+                State = States.Idle; 
+            }
+            else if (!IsJellyAhead())
+            {
+                Debug.Log("Not IsJellyAhead");
+                
+                {
+                    Debug.Log("canWalk");
+                    {
+                        //State = States.Walk;
+                        Vector2 inputDirection = context.ReadValue<Vector2>();
+                        if (inputDirection.x > 0) // Move right
+                        {
+                            if (motionDirection != Vector3.right) //rotation
+                            {
+                                motionDirection = Vector3.right;
+                                Quaternion targetRotation = Quaternion.LookRotation(motionDirection, Vector3.up);
+                                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+                            }
+                            else
+                            {
+                                if (canWalkForward())
+                                {
+                                    targetPos = transform.position + motionDirection * stepSize;
+                                    animator.SetTrigger("walk");
+                                }
+                                else EmoteNoAnimation();
+                            }
+                        }
+                        else if (inputDirection.x < 0) // Move left
+                        {
+                            if (motionDirection != Vector3.left)
+                            {
+                                motionDirection = Vector3.left;
+                                Quaternion targetRotation = Quaternion.LookRotation(motionDirection, Vector3.up);
+                                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+                            }
+                            else
+                            {
+                                if (canWalkForward())
+                                {
+                                    targetPos = transform.position + motionDirection * stepSize;
+                                    animator.SetTrigger("walk");
+                                }
+                                else EmoteNoAnimation();
+                            }
+                        }
+                        else if (inputDirection.y > 0)
+                        {
+                            if (motionDirection != Vector3.forward)
+                            {
+                                motionDirection = Vector3.forward;
+                                Quaternion targetRotation = Quaternion.LookRotation(motionDirection, Vector3.up);
+                                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+                            }
+                            else
+                            {
+                                if (canWalkForward())
+                                {
+                                    targetPos = transform.position + motionDirection * stepSize;
+                                    animator.SetTrigger("walk");
+                                }
+                                else EmoteNoAnimation();
+                            }
+                        }
+                        else if (inputDirection.y < 0)
+                        {
+                            if (motionDirection != Vector3.back)
+                            {
+                                motionDirection = Vector3.back;
+                                Quaternion targetRotation = Quaternion.LookRotation(motionDirection, Vector3.up);
+                                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+                            }
+                            else
+                            {
+                                if (canWalkForward())
+                                {
+                                    targetPos = transform.position + motionDirection * stepSize;
+                                    animator.SetTrigger("walk");
+                                }
+                                else EmoteNoAnimation();
+                            }
+                        }
+
+                        State = States.Idle;
+                    }
+                }
+                /* else
+                {
+                    Debug.Log("CannotWalk");
+                    EmoteNoAnimation();
+                    State = States.Idle;
+                } */
+            }
+        }
+        /* if (IsJellyAhead())
         {
             Debug.Log("IsJellyAhead");
             if (jumpChecker.CanPlayerJump())
             {
                 Debug.Log("CanPlayerJump");
-                {
-                    if (canWalk())
-                    {
-                        MovePlayer(context);
-                    }
-                    State = States.Idle;
-                }
+                MovePlayer(context);
+                State = States.Idle;
+
             }
             else
             {
                 Debug.Log("CannotJump");
-                EmoteNoAnimation();
+                if (canWalk())
+                {
+                    MovePlayer(context);
+                    State = States.Idle;    
+                }
             }
         }
-        else
+        else if (!IsJellyAhead())
         {
-            Debug.Log("NotJellyAhead");
-            /* if (canWalk())
-            {
-                Debug.Log("canWalk"); */
             MovePlayer(context);
-            /* } else {
-                Debug.Log("CannotWalk");
-                EmoteNoAnimation();
-            } */
-        }
+            State = States.Idle;
+        } */
     }
 
-    private void MovePlayer(InputAction.CallbackContext context)
+/*     private void MovePlayer(InputAction.CallbackContext context)
     {
 
-        if (context.performed /* && (transform.position - targetPos).sqrMagnitude < 0.01f */ && State == States.Idle)
+        if (context.performed 
+        // && (transform.position - targetPos).sqrMagnitude < 0.01f  
+        && State == States.Idle)
         {
 
             //State = States.Walk;
@@ -141,7 +321,8 @@ public class PlayerMovement : MonoBehaviour
                 }
                 else
                 {
-                    MoveOnlyIfThereIsATile();
+                    targetPos = transform.position + motionDirection * stepSize;
+                    animator.SetTrigger("walk");
                 }
             }
             else if (inputDirection.x < 0) // Move left
@@ -154,7 +335,8 @@ public class PlayerMovement : MonoBehaviour
                 }
                 else
                 {
-                    MoveOnlyIfThereIsATile();
+                    targetPos = transform.position + motionDirection * stepSize;
+            animator.SetTrigger("walk");
                 }
             }
             else if (inputDirection.y > 0)
@@ -167,7 +349,8 @@ public class PlayerMovement : MonoBehaviour
                 }
                 else
                 {
-                    MoveOnlyIfThereIsATile();
+                    targetPos = transform.position + motionDirection * stepSize;
+            animator.SetTrigger("walk");
                 }
             }
             else if (inputDirection.y < 0)
@@ -180,16 +363,19 @@ public class PlayerMovement : MonoBehaviour
                 }
                 else
                 {
-                    MoveOnlyIfThereIsATile();
+                    targetPos = transform.position + motionDirection * stepSize;
+            animator.SetTrigger("walk");
                 }
             }
         }
         //Set to idle if no input or too far from the target position
         else State = States.Idle;
-    }
+    } 
+    */
 
-    private void MoveOnlyIfThereIsATile()
+    /* private void MoveOnlyIfThereIsATile()
     {
+        Debug.Log("MoveOnlyIfThereIsATile");
         if (canWalk())
         {
             targetPos = transform.position + motionDirection * stepSize;
@@ -199,7 +385,7 @@ public class PlayerMovement : MonoBehaviour
         {
             EmoteNoAnimation();
         }
-    }
+    } */
 
     private void EmoteNoAnimation()
     {
@@ -210,7 +396,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (context.performed)
         {
-            if (canWalk())
+            if (canWalkForward())
             {
                 if (!isDrumSummoned && State == States.Idle)
                 {
@@ -348,7 +534,7 @@ public class PlayerMovement : MonoBehaviour
 
     }
 
-    bool canWalk()
+    bool canWalkForward()
     {
         Vector3 origin = raycastOrigin.position;
         Vector3 direction = transform.forward;
