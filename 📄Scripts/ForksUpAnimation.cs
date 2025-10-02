@@ -5,11 +5,12 @@ public class ForksUpAnimation : MonoBehaviour
 {
     public bool forksActive = true;
     public Animator animator;
+    [SerializeField] float trapDelay = 3f;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         animator = GetComponent<Animator>();
-        StartCoroutine(SetTriggerAfterDelay(2f));
+        StartCoroutine(SetTriggerAfterDelay(trapDelay));
     }
 
     // Update is called once per frame

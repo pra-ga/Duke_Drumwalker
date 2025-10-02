@@ -531,18 +531,19 @@ MonoBehaviour:
   speed: 2
   rotationSpeed: 1000
   jumpForce: 3
+  animator: {fileID: 1800302319478708429}
+  State: 0
   drum: {fileID: 4090499745074693540, guid: 8c488929c1f30634eb6876bca2e93948, type: 3}
   drumSummonPoint: {fileID: 5591477897810445646}
   drumTopPos: {fileID: 0}
   targetScaleY: 0.5
   duration: 1
+  playerDieByFire: 0
   door: {fileID: 0}
   raycastOrigin: {fileID: 973916354474659379}
   jellyRaycastOrigin: {fileID: 7709226905304915973}
   raycastDistanceToCheckWalk: 1
   raycastDistanceToCheckJump: 3
-  targetTagForWalk: none
-  targetTagForJump: none
 --- !u!114 &3753562851088458693
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -555,7 +556,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
-  m_Actions: {fileID: 0}
+  m_Actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_NotificationBehavior: 2
   m_UIInputModule: {fileID: 0}
   m_DeviceLostEvent:

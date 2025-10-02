@@ -5,13 +5,14 @@ using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 #region Todo
+// Bug : Die animation not playing
 // BUG : ✅Prevent jump if there is no floor across jelly. Check by ray casting 3 tiles away.
 // BUG : ✅Jelly should get summoned only on a tile
 // BUG : ✅Remove dependecy on JumpForce. Instead check the cooridinate of the next tile.
-// BUG : When the player refuses to jump on jelly, he does not turn
+// BUG : ✅When the player refuses to jump on jelly, he does not turn
 // TODO: Summon particle effects
-// TODO: Fix raycast
-// TODO: States enum
+// TODO: ✅Fix raycast
+// TODO: ✅States enum
 // TODO: Audio
 // TODO: Particle effects   
 // TODO: UI
@@ -24,13 +25,13 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] float speed = 5f;
     [SerializeField] float rotationSpeed = 1000f;
     [SerializeField] float jumpForce = 10f;
-    Animator animator;
+    public Animator animator;
     Rigidbody rb;
     Vector3 targetPos;
     Vector3 drumPlus2Pos;
     Vector3 motionDirection;
-    enum States { Idle, Walk, Jump, Summon, DoorOpen, EmoteNo, Die };
-    States State;
+    public enum States { Idle, Walk, Jump, Summon, DoorOpen, EmoteNo, Die };
+    public States State;
 
     [Header("Drum")]
     [SerializeField] GameObject drum;
@@ -60,7 +61,6 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] float raycastDistanceToCheckJump = 3f; // Set the raycast distance to check next tile
     Vector3 playerToJellyDirection = Vector3.zero;
     JumpChecker jumpChecker;
-    FireTileManager fireTileManager;
 
 
     void Start()
@@ -69,6 +69,7 @@ public class PlayerMovement : MonoBehaviour
         targetPos = transform.position;
         rb = GetComponent<Rigidbody>();
         doorAnimator = door.GetComponentInChildren<Animator>();
+        doorAnimator.SetBool("isDoorOpen", false);
 
         currentSceneInt = SceneManager.GetActiveScene().buildIndex;
         Debug.Log("currentSceneInt: " + currentSceneInt);
@@ -83,9 +84,13 @@ public class PlayerMovement : MonoBehaviour
         switch (currentSceneInt)
         {
             case 0:
-                break;
+                intNumberOfFruitsInScene = 1;
+                break; // Exits the switch statement
             case 1:
                 intNumberOfFruitsInScene = 1;
+                break; // Exits the switch statement
+            case 2:
+                intNumberOfFruitsInScene = 2;
                 break; // Exits the switch statement
         }
     }
@@ -263,126 +268,10 @@ public class PlayerMovement : MonoBehaviour
                         State = States.Idle;
                     }
                 }
-                /* else
-                {
-                    Debug.Log("CannotWalk");
-                    EmoteNoAnimation();
-                    State = States.Idle;
-                } */
             }
         }
-        /* if (IsJellyAhead())
-        {
-            Debug.Log("IsJellyAhead");
-            if (jumpChecker.CanPlayerJump())
-            {
-                Debug.Log("CanPlayerJump");
-                MovePlayer(context);
-                State = States.Idle;
 
-            }
-            else
-            {
-                Debug.Log("CannotJump");
-                if (canWalk())
-                {
-                    MovePlayer(context);
-                    State = States.Idle;    
-                }
-            }
-        }
-        else if (!IsJellyAhead())
-        {
-            MovePlayer(context);
-            State = States.Idle;
-        } */
     }
-
-    /*     private void MovePlayer(InputAction.CallbackContext context)
-        {
-
-            if (context.performed 
-            // && (transform.position - targetPos).sqrMagnitude < 0.01f  
-            && State == States.Idle)
-            {
-
-                //State = States.Walk;
-                Vector2 inputDirection = context.ReadValue<Vector2>();
-                if (inputDirection.x > 0) // Move right
-                {
-                    if (motionDirection != Vector3.right) //rotation
-                    {
-                        motionDirection = Vector3.right;
-                        Quaternion targetRotation = Quaternion.LookRotation(motionDirection, Vector3.up);
-                        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-                    }
-                    else
-                    {
-                        targetPos = transform.position + motionDirection * stepSize;
-                        animator.SetTrigger("walk");
-                    }
-                }
-                else if (inputDirection.x < 0) // Move left
-                {
-                    if (motionDirection != Vector3.left)
-                    {
-                        motionDirection = Vector3.left;
-                        Quaternion targetRotation = Quaternion.LookRotation(motionDirection, Vector3.up);
-                        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-                    }
-                    else
-                    {
-                        targetPos = transform.position + motionDirection * stepSize;
-                animator.SetTrigger("walk");
-                    }
-                }
-                else if (inputDirection.y > 0)
-                {
-                    if (motionDirection != Vector3.forward)
-                    {
-                        motionDirection = Vector3.forward;
-                        Quaternion targetRotation = Quaternion.LookRotation(motionDirection, Vector3.up);
-                        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-                    }
-                    else
-                    {
-                        targetPos = transform.position + motionDirection * stepSize;
-                animator.SetTrigger("walk");
-                    }
-                }
-                else if (inputDirection.y < 0)
-                {
-                    if (motionDirection != Vector3.back)
-                    {
-                        motionDirection = Vector3.back;
-                        Quaternion targetRotation = Quaternion.LookRotation(motionDirection, Vector3.up);
-                        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
-                    }
-                    else
-                    {
-                        targetPos = transform.position + motionDirection * stepSize;
-                animator.SetTrigger("walk");
-                    }
-                }
-            }
-            //Set to idle if no input or too far from the target position
-            else State = States.Idle;
-        } 
-        */
-
-    /* private void MoveOnlyIfThereIsATile()
-    {
-        Debug.Log("MoveOnlyIfThereIsATile");
-        if (canWalk())
-        {
-            targetPos = transform.position + motionDirection * stepSize;
-            animator.SetTrigger("walk");
-        }
-        else
-        {
-            EmoteNoAnimation();
-        }
-    } */
 
     private void EmoteNoAnimation()
     {
@@ -423,13 +312,16 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         Debug.Log("State: " + State);
-        if ((transform.position - targetPos).sqrMagnitude < 0.01f)
+        if (State == States.Die) animator.SetTrigger("Die");
+
+        if ((transform.position - targetPos).sqrMagnitude < 0.01f && State != States.Die)
         {
             State = States.Idle;
             transform.position = new Vector3(Mathf.RoundToInt(transform.position.x),
-                                             Mathf.RoundToInt(transform.position.y),
-                                             Mathf.RoundToInt(transform.position.z));
+                                                Mathf.RoundToInt(transform.position.y),
+                                                Mathf.RoundToInt(transform.position.z));
         }
+
         else State = States.Walk;
 
         if (State == States.Walk)
@@ -437,7 +329,7 @@ public class PlayerMovement : MonoBehaviour
             transform.position = Vector3.MoveTowards(transform.position, targetPos, speed * Time.deltaTime);
         }
         DoorOpenCheck();
-        CheckDie();
+
     }
 
     void OnTriggerEnter(Collider other)
@@ -457,6 +349,11 @@ public class PlayerMovement : MonoBehaviour
         {
             intNumberOfFruits++;
             Destroy(other.gameObject);
+        }
+
+        if (other.gameObject.tag == "ExitDoor" && doorAnimator.GetBool("isDoorOpen") == true)
+        {
+            LevelWin();
         }
     }
 
@@ -483,7 +380,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (intNumberOfFruits == intNumberOfFruitsInScene)
         {
-            doorAnimator.SetTrigger("open");
+            doorAnimator.SetBool("isDoorOpen", true);
         }
     }
 
@@ -540,7 +437,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (Physics.Raycast(origin, direction, out hit, raycastDistanceToCheckWalk))
         {
-            if (hit.transform.tag == "Tile" || hit.transform.tag == "Fruits" || hit.transform.tag == "ExitDoor")
+            if (hit.transform.tag == "Tile" || hit.transform.tag == "Fruits" || (hit.transform.tag == "ExitDoor" && doorAnimator.GetBool("isDoorOpen") == true))
             {
                 return true;
             }
@@ -564,13 +461,80 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    void CheckDie()
+    public void CheckDie()
     {
-        if (playerDieByFire)
+        //animator.SetTrigger("Die");
+        Debug.Log("playerDieByFire in PlayerMovement: " + playerDieByFire);
+        if (State == States.Die) animator.SetTrigger("Die");//animator.Play("die");
+        ReloadSceneOnCollision();
+    }
+
+    void LoadNextSceneOnSuccess()
+    {
+        if (HasNextScene() && currentSceneInt < 9)
         {
-            State = States.Die;
-            animator.SetTrigger("Die");
-            Debug.Log("playerDieByFire in PlayerMovement: " + playerDieByFire);
+            int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
+            SceneManager.LoadScene(currentSceneIndex + 1);
+        }
+        else
+        {
+            SceneManager.LoadScene(0);
+            //ShowWinPanel();
+        }
+
+    }
+
+    //Coroutine when rocket land successfully
+    IEnumerator DelayedSceneLoadOnSuccess()
+    {
+        //audioSource.PlayOneShot(winSound);
+        //Instantiate(winParticles, rocket.transform.position, Quaternion.identity);
+        //winParticles.Play();
+
+        yield return new WaitForSeconds(1.5f);
+        //yield return new WaitUntil(() => ghostAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f && !ghostAnimator.IsInTransition(0));
+        LoadNextSceneOnSuccess();
+    }
+
+    bool HasNextScene()
+    {
+        int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
+        int totalScenesInBuild = SceneManager.sceneCountInBuildSettings;
+
+        // Check if there's a scene at the next index
+        if (currentSceneIndex + 1 < totalScenesInBuild)
+        {
+            return true; // A next scene exists
+        }
+        else
+        {
+            return false; // No next scene in the build order
         }
     }
+
+    void LevelWin()
+    {
+        Debug.Log("Level Win");
+        StopAllCoroutines();
+        StartCoroutine(DelayedSceneLoadOnSuccess());
+        //audioSource.PlayOneShot(winSound);
+    }
+
+    //Reload the scene when rocket collides on obstacle
+    public void ReloadSceneOnCollision()
+    {
+        int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
+        SceneManager.LoadScene(currentSceneIndex);
+    }
+
+    //Coroutine when rocket collides with "Obstacles"
+    IEnumerator DelayedSceneLoadOnCollision()
+    {
+        //audioSource.PlayOneShot(loseExplosion);
+        //Instantiate(crashParticles, rocket.transform.position, Quaternion.identity);
+        yield return new WaitForSeconds(1.5f);
+
+        ReloadSceneOnCollision();
+    }
+
 }

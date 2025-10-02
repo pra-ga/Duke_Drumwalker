@@ -12,22 +12,24 @@ public class FireTileManager : MonoBehaviour
         playerMovement = player.GetComponent<PlayerMovement>();
     }
 
-    void OnParticleCollision(GameObject other)
+  /*   void OnParticleCollision(GameObject other)
     {
         Debug.Log("playerDieByFire: " + playerMovement.playerDieByFire);
         if (other.gameObject.tag == "Player" && fireParticle.isEmitting)
         {
             playerMovement.playerDieByFire = true;
         }
-    }
+    } */
 
     void OnTriggerEnter(Collider other)
     {
-        Debug.Log("OnTriggerEnter FireTileManager");
         if (other.gameObject.tag == "Player" && fireParticle.isEmitting)
         {
-            playerMovement.playerDieByFire = true;
-            Debug.Log("playerDieByFire in FireTileManager: " + playerMovement.playerDieByFire);
+            playerMovement.State = PlayerMovement.States.Die;
+            //playerMovement.CheckDie();
+            //playerMovement.playerDieByFire = true;
+
+            Debug.Log("playerDieByFire in FireTileManager: " + playerMovement.playerDieByFire + "playerMovement.State: " + playerMovement.State);
         }
     }
 
