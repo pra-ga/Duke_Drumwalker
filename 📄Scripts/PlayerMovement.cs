@@ -41,7 +41,7 @@ public class PlayerMovement : MonoBehaviour
     GameObject _drum = null;
     public float targetScaleY = 0.5f; // The desired Y scale
     public float duration = 1f; // How long the scaling animation takes
-    public bool playerDieByFire = false;
+    public bool playerDieByFire;
     Vector3 originalDrumScale;
 
     private bool isScaling = false;
@@ -74,9 +74,8 @@ public class PlayerMovement : MonoBehaviour
         currentSceneInt = SceneManager.GetActiveScene().buildIndex;
         Debug.Log("currentSceneInt: " + currentSceneInt);
         LoadSceneVariables(currentSceneInt);
-        //forwardChecker = GetComponentInChildren<ForwardChecker>();
         State = States.Idle; //Initially idle
-
+        playerDieByFire = false;
     }
 
     void LoadSceneVariables(int currentSceneInt)
@@ -118,7 +117,7 @@ public class PlayerMovement : MonoBehaviour
                                 if (canWalkForward() && jumpChecker.CanPlayerJump())
                                 {
                                     targetPos = transform.position + motionDirection * stepSize;
-                                    animator.SetTrigger("walk");
+                                    animator.SetBool("isWalking", true);
                                 }
                                 else EmoteNoAnimation();
                             }
@@ -136,7 +135,7 @@ public class PlayerMovement : MonoBehaviour
                                 if (canWalkForward() && jumpChecker.CanPlayerJump())
                                 {
                                     targetPos = transform.position + motionDirection * stepSize;
-                                    animator.SetTrigger("walk");
+                                    animator.SetBool("isWalking", true);
                                 }
                                 else EmoteNoAnimation();
                             }
@@ -154,7 +153,7 @@ public class PlayerMovement : MonoBehaviour
                                 if (canWalkForward() && jumpChecker.CanPlayerJump())
                                 {
                                     targetPos = transform.position + motionDirection * stepSize;
-                                    animator.SetTrigger("walk");
+                                    animator.SetBool("isWalking", true);
                                 }
                                 else EmoteNoAnimation();
                             }
@@ -172,7 +171,7 @@ public class PlayerMovement : MonoBehaviour
                                 if (canWalkForward() && jumpChecker.CanPlayerJump())
                                 {
                                     targetPos = transform.position + motionDirection * stepSize;
-                                    animator.SetTrigger("walk");
+                                    animator.SetBool("isWalking", true);
                                 }
                                 else EmoteNoAnimation();
                             }
@@ -205,7 +204,7 @@ public class PlayerMovement : MonoBehaviour
                                 if (canWalkForward())
                                 {
                                     targetPos = transform.position + motionDirection * stepSize;
-                                    animator.SetTrigger("walk");
+                                    animator.SetBool("isWalking", true);
                                 }
                                 else EmoteNoAnimation();
                             }
@@ -223,7 +222,7 @@ public class PlayerMovement : MonoBehaviour
                                 if (canWalkForward())
                                 {
                                     targetPos = transform.position + motionDirection * stepSize;
-                                    animator.SetTrigger("walk");
+                                    animator.SetBool("isWalking", true);
                                 }
                                 else EmoteNoAnimation();
                             }
@@ -241,7 +240,7 @@ public class PlayerMovement : MonoBehaviour
                                 if (canWalkForward())
                                 {
                                     targetPos = transform.position + motionDirection * stepSize;
-                                    animator.SetTrigger("walk");
+                                    animator.SetBool("isWalking", true);
                                 }
                                 else EmoteNoAnimation();
                             }
@@ -259,7 +258,7 @@ public class PlayerMovement : MonoBehaviour
                                 if (canWalkForward())
                                 {
                                     targetPos = transform.position + motionDirection * stepSize;
-                                    animator.SetTrigger("walk");
+                                    animator.SetBool("isWalking", true);
                                 }
                                 else EmoteNoAnimation();
                             }
@@ -312,7 +311,9 @@ public class PlayerMovement : MonoBehaviour
     void Update()
     {
         Debug.Log("State: " + State);
-        if (State == States.Die) animator.SetTrigger("Die");
+
+        if (State == States.Idle) animator.SetBool("isWalking", false);
+        if (State == States.Walk) animator.SetBool("isWalking", true);
 
         if ((transform.position - targetPos).sqrMagnitude < 0.01f && State != States.Die)
         {
@@ -328,7 +329,11 @@ public class PlayerMovement : MonoBehaviour
         {
             transform.position = Vector3.MoveTowards(transform.position, targetPos, speed * Time.deltaTime);
         }
+
         DoorOpenCheck();
+        CheckDie();
+
+        Debug.Log("playerDieByFire in PlayerMovement: " + playerDieByFire);
 
     }
 
@@ -461,12 +466,16 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    public void CheckDie()
+    void CheckDie()
     {
-        //animator.SetTrigger("Die");
         Debug.Log("playerDieByFire in PlayerMovement: " + playerDieByFire);
-        if (State == States.Die) animator.SetTrigger("Die");//animator.Play("die");
-        ReloadSceneOnCollision();
+        if (playerDieByFire == true)
+        {
+            State = States.Die;
+            animator.SetBool("isWalking", false);
+            animator.SetTrigger("Die");
+            StartCoroutine(DelayedSceneLoadOnCollision());
+        }
     }
 
     void LoadNextSceneOnSuccess()
@@ -487,12 +496,7 @@ public class PlayerMovement : MonoBehaviour
     //Coroutine when rocket land successfully
     IEnumerator DelayedSceneLoadOnSuccess()
     {
-        //audioSource.PlayOneShot(winSound);
-        //Instantiate(winParticles, rocket.transform.position, Quaternion.identity);
-        //winParticles.Play();
-
         yield return new WaitForSeconds(1.5f);
-        //yield return new WaitUntil(() => ghostAnimator.GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f && !ghostAnimator.IsInTransition(0));
         LoadNextSceneOnSuccess();
     }
 
@@ -530,10 +534,7 @@ public class PlayerMovement : MonoBehaviour
     //Coroutine when rocket collides with "Obstacles"
     IEnumerator DelayedSceneLoadOnCollision()
     {
-        //audioSource.PlayOneShot(loseExplosion);
-        //Instantiate(crashParticles, rocket.transform.position, Quaternion.identity);
         yield return new WaitForSeconds(1.5f);
-
         ReloadSceneOnCollision();
     }
 
