@@ -10,11 +10,10 @@ using UnityEngine.SceneManagement;
 // BUG : ✅Jelly should get summoned only on a tile
 // BUG : ✅Remove dependecy on JumpForce. Instead check the cooridinate of the next tile.
 // BUG : ✅When the player refuses to jump on jelly, he does not turn
-// TODO: Summon particle effects
 // TODO: ✅Fix raycast
 // TODO: ✅States enum
 // TODO: Audio
-// TODO: Particle effects   
+// TODO: Particle effects: Walk, Jump, Summon, Die, Fruit pickup, Door Open, Environment   
 // TODO: UI
 // TODO: Menu   
 #endregion
@@ -32,6 +31,12 @@ public class PlayerMovement : MonoBehaviour
     Vector3 motionDirection;
     public enum States { Idle, Walk, Jump, Summon, DoorOpen, EmoteNo, Die };
     public States State;
+
+    [Header("Particle Effects")]
+    [SerializeField] ParticleSystem environmentParticles;
+    [SerializeField] ParticleSystem walkDustParticles;
+    [SerializeField] ParticleSystem summonParticles;
+    [SerializeField] ParticleSystem dieParticles;
 
     [Header("Drum")]
     [SerializeField] GameObject drum;
@@ -76,6 +81,8 @@ public class PlayerMovement : MonoBehaviour
         LoadSceneVariables(currentSceneInt);
         State = States.Idle; //Initially idle
         playerDieByFire = false;
+
+        Instantiate(environmentParticles, Vector3.zero, Quaternion.identity);
     }
 
     void LoadSceneVariables(int currentSceneInt)
@@ -118,6 +125,7 @@ public class PlayerMovement : MonoBehaviour
                                 {
                                     targetPos = transform.position + motionDirection * stepSize;
                                     animator.SetBool("isWalking", true);
+                                    walkDustParticles.Play();
                                 }
                                 else EmoteNoAnimation();
                             }
@@ -136,6 +144,7 @@ public class PlayerMovement : MonoBehaviour
                                 {
                                     targetPos = transform.position + motionDirection * stepSize;
                                     animator.SetBool("isWalking", true);
+                                    walkDustParticles.Play();
                                 }
                                 else EmoteNoAnimation();
                             }
@@ -154,6 +163,7 @@ public class PlayerMovement : MonoBehaviour
                                 {
                                     targetPos = transform.position + motionDirection * stepSize;
                                     animator.SetBool("isWalking", true);
+                                    walkDustParticles.Play();
                                 }
                                 else EmoteNoAnimation();
                             }
@@ -172,6 +182,7 @@ public class PlayerMovement : MonoBehaviour
                                 {
                                     targetPos = transform.position + motionDirection * stepSize;
                                     animator.SetBool("isWalking", true);
+                                    walkDustParticles.Play();
                                 }
                                 else EmoteNoAnimation();
                             }
@@ -205,6 +216,7 @@ public class PlayerMovement : MonoBehaviour
                                 {
                                     targetPos = transform.position + motionDirection * stepSize;
                                     animator.SetBool("isWalking", true);
+                                    walkDustParticles.Play();
                                 }
                                 else EmoteNoAnimation();
                             }
@@ -223,6 +235,7 @@ public class PlayerMovement : MonoBehaviour
                                 {
                                     targetPos = transform.position + motionDirection * stepSize;
                                     animator.SetBool("isWalking", true);
+                                    walkDustParticles.Play();
                                 }
                                 else EmoteNoAnimation();
                             }
@@ -241,6 +254,7 @@ public class PlayerMovement : MonoBehaviour
                                 {
                                     targetPos = transform.position + motionDirection * stepSize;
                                     animator.SetBool("isWalking", true);
+                                    walkDustParticles.Play();
                                 }
                                 else EmoteNoAnimation();
                             }
@@ -259,6 +273,7 @@ public class PlayerMovement : MonoBehaviour
                                 {
                                     targetPos = transform.position + motionDirection * stepSize;
                                     animator.SetBool("isWalking", true);
+                                    walkDustParticles.Play();
                                 }
                                 else EmoteNoAnimation();
                             }
@@ -286,6 +301,7 @@ public class PlayerMovement : MonoBehaviour
                 if (!isDrumSummoned && State == States.Idle)
                 {
                     animator.SetTrigger("Summon");
+                    summonParticles.Play();
                     _drum = Instantiate(drum, drumSummonPoint.position, drumSummonPoint.rotation);
                     jellyAnimator = _drum.GetComponentInChildren<Animator>();
                     jumpChecker = _drum.GetComponentInChildren<JumpChecker>();
@@ -313,17 +329,20 @@ public class PlayerMovement : MonoBehaviour
         Debug.Log("State: " + State);
 
         if (State == States.Idle) animator.SetBool("isWalking", false);
-        if (State == States.Walk) animator.SetBool("isWalking", true);
-
-        if ((transform.position - targetPos).sqrMagnitude < 0.01f && State != States.Die)
-        {
-            State = States.Idle;
-            transform.position = new Vector3(Mathf.RoundToInt(transform.position.x),
-                                                Mathf.RoundToInt(transform.position.y),
-                                                Mathf.RoundToInt(transform.position.z));
+        if (State == States.Walk) {
+            animator.SetBool("isWalking", true);
+            //walkDustParticles.Play();
         }
 
-        else State = States.Walk;
+        if ((transform.position - targetPos).sqrMagnitude < 0.01f && State != States.Die)
+            {
+                State = States.Idle;
+                transform.position = new Vector3(Mathf.RoundToInt(transform.position.x),
+                                                    Mathf.RoundToInt(transform.position.y),
+                                                    Mathf.RoundToInt(transform.position.z));
+            }
+
+            else State = States.Walk;
 
         if (State == States.Walk)
         {
@@ -359,6 +378,11 @@ public class PlayerMovement : MonoBehaviour
         if (other.gameObject.tag == "ExitDoor" && doorAnimator.GetBool("isDoorOpen") == true)
         {
             LevelWin();
+        }
+
+        if (other.gameObject.tag == "Forks")
+        {
+            playerDieByFire = true;
         }
     }
 
@@ -473,7 +497,9 @@ public class PlayerMovement : MonoBehaviour
         {
             State = States.Die;
             animator.SetBool("isWalking", false);
+            walkDustParticles.Play();
             animator.SetTrigger("Die");
+            dieParticles.Play();
             StartCoroutine(DelayedSceneLoadOnCollision());
         }
     }
