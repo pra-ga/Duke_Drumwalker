@@ -7,12 +7,12 @@ public class JumpChecker : MonoBehaviour
     void OnTriggerEnter(Collider other)
     {
         jumpCheckerTag = other.tag;
-        //Debug.Log("JumpCheckerTag: " + jumpCheckerTag);
+        Debug.Log("JumpCheckerTag: " + jumpCheckerTag);
     }
 
     public bool CanPlayerJump()
     {
-        if (jumpCheckerTag == "Tile")
+        if (jumpCheckerTag == "Tile" || jumpCheckerTag == "Forks" || jumpCheckerTag == "ExitDoor")
         {
             return true;
         }

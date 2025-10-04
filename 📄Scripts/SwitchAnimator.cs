@@ -19,7 +19,7 @@ public class SwitchAnimator : MonoBehaviour
         if (other.gameObject.tag == "Player" || other.gameObject.tag == "Drum")
         {
             switchAnimator.SetTrigger("toggle-on");
-            forksUpAnimation.animator.SetTrigger("ForksDown");
+            //forksUpAnimation.animator.SetBool("isForkUp", true);
             forksUpAnimation.forksActive = false;
         }
     }

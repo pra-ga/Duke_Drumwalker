@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 #region Todo
-// Bug : Die animation not playing
+// Bug : ✅Die animation not playing
 // BUG : ✅Prevent jump if there is no floor across jelly. Check by ray casting 3 tiles away.
 // BUG : ✅Jelly should get summoned only on a tile
 // BUG : ✅Remove dependecy on JumpForce. Instead check the cooridinate of the next tile.
@@ -36,7 +36,9 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] ParticleSystem environmentParticles;
     [SerializeField] ParticleSystem walkDustParticles;
     [SerializeField] ParticleSystem summonParticles;
+    [SerializeField] float dieParticlesDelay = 1f;
     [SerializeField] ParticleSystem dieParticles;
+    [SerializeField] ParticleSystem jumpParticles;
 
     [Header("Drum")]
     [SerializeField] GameObject drum;
@@ -97,6 +99,15 @@ public class PlayerMovement : MonoBehaviour
                 break; // Exits the switch statement
             case 2:
                 intNumberOfFruitsInScene = 2;
+                break; // Exits the switch statement
+            case 3:
+                intNumberOfFruitsInScene = 1;
+                break; // Exits the switch statement
+            case 4:
+                intNumberOfFruitsInScene = 1;
+                break; // Exits the switch statement
+            case 5:
+                intNumberOfFruitsInScene = 3;
                 break; // Exits the switch statement
         }
     }
@@ -329,20 +340,21 @@ public class PlayerMovement : MonoBehaviour
         Debug.Log("State: " + State);
 
         if (State == States.Idle) animator.SetBool("isWalking", false);
-        if (State == States.Walk) {
+        if (State == States.Walk)
+        {
             animator.SetBool("isWalking", true);
             //walkDustParticles.Play();
         }
 
         if ((transform.position - targetPos).sqrMagnitude < 0.01f && State != States.Die)
-            {
-                State = States.Idle;
-                transform.position = new Vector3(Mathf.RoundToInt(transform.position.x),
-                                                    Mathf.RoundToInt(transform.position.y),
-                                                    Mathf.RoundToInt(transform.position.z));
-            }
+        {
+            State = States.Idle;
+            transform.position = new Vector3(Mathf.RoundToInt(transform.position.x),
+                                                Mathf.RoundToInt(transform.position.y),
+                                                Mathf.RoundToInt(transform.position.z));
+        }
 
-            else State = States.Walk;
+        else State = States.Walk;
 
         if (State == States.Walk)
         {
@@ -397,12 +409,15 @@ public class PlayerMovement : MonoBehaviour
     IEnumerator JellyJump()
     {
         yield return new WaitForSeconds(1f);
+        rb.isKinematic = false;
         rb.useGravity = true;
         Vector3 Vec45 = transform.up.normalized + transform.forward.normalized;
         rb.AddForce(Vec45 * jumpForce, ForceMode.Impulse);
+        //jumpParticles.Play();
         targetPos = drumPlus2Pos;
         yield return new WaitForSeconds(1.0f);
         rb.useGravity = false;
+        rb.isKinematic = true;
     }
 
     void DoorOpenCheck()
@@ -499,7 +514,7 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool("isWalking", false);
             walkDustParticles.Play();
             animator.SetTrigger("Die");
-            dieParticles.Play();
+            StartCoroutine(DelayedParticlesOnDie());
             StartCoroutine(DelayedSceneLoadOnCollision());
         }
     }
@@ -562,6 +577,12 @@ public class PlayerMovement : MonoBehaviour
     {
         yield return new WaitForSeconds(1.5f);
         ReloadSceneOnCollision();
+    }
+    
+    IEnumerator DelayedParticlesOnDie()
+    {
+        yield return new WaitForSeconds(dieParticlesDelay);
+        dieParticles.Play();
     }
 
 }
