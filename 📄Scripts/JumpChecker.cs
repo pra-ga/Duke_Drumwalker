@@ -7,7 +7,7 @@ public class JumpChecker : MonoBehaviour
     void OnTriggerEnter(Collider other)
     {
         jumpCheckerTag = other.tag;
-        Debug.Log("JumpCheckerTag: " + jumpCheckerTag);
+        
     }
 
     public bool CanPlayerJump()

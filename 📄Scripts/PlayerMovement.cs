@@ -68,6 +68,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] float raycastDistanceToCheckJump = 3f; // Set the raycast distance to check next tile
     Vector3 playerToJellyDirection = Vector3.zero;
     JumpChecker jumpChecker;
+    public bool isPlayerOnBridge = false;
 
 
     void Start()
@@ -79,7 +80,6 @@ public class PlayerMovement : MonoBehaviour
         doorAnimator.SetBool("isDoorOpen", false);
 
         currentSceneInt = SceneManager.GetActiveScene().buildIndex;
-        Debug.Log("currentSceneInt: " + currentSceneInt);
         LoadSceneVariables(currentSceneInt);
         State = States.Idle; //Initially idle
         playerDieByFire = false;
@@ -109,6 +109,9 @@ public class PlayerMovement : MonoBehaviour
             case 5:
                 intNumberOfFruitsInScene = 3;
                 break; // Exits the switch statement
+            case 6:
+                intNumberOfFruitsInScene = 2;
+                break; 
         }
     }
 
@@ -364,8 +367,6 @@ public class PlayerMovement : MonoBehaviour
         DoorOpenCheck();
         CheckDie();
 
-        Debug.Log("playerDieByFire in PlayerMovement: " + playerDieByFire);
-
     }
 
     void OnTriggerEnter(Collider other)
@@ -396,6 +397,11 @@ public class PlayerMovement : MonoBehaviour
         {
             playerDieByFire = true;
         }
+
+        if (other.gameObject.tag == "PlayerDetector")
+        {
+            isPlayerOnBridge = true;
+        }
     }
 
     void OnTriggerExit(Collider other)
@@ -403,6 +409,11 @@ public class PlayerMovement : MonoBehaviour
         if (other.gameObject.tag == "Drum")
         {
             State = States.Idle;
+        }
+
+        if (other.gameObject.tag == "PlayerDetector")
+        {
+            //isPlayerOnBridge = false;
         }
     }
 
@@ -507,7 +518,6 @@ public class PlayerMovement : MonoBehaviour
 
     void CheckDie()
     {
-        Debug.Log("playerDieByFire in PlayerMovement: " + playerDieByFire);
         if (playerDieByFire == true)
         {
             State = States.Die;
